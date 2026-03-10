@@ -69,7 +69,7 @@ export const calls = pgTable("calls", {
   callGoal:     callGoalEnum("call_goal").notNull(),
 
   // ── Vapi data (filled during / after call) ──
-  vapiCallId:      text("vapi_call_id").unique(),
+  vapiCallId:      uuid("vapi_call_id").defaultRandom().unique().notNull(),
   status:          callStatusEnum("status").default("pending").notNull(),
   durationSeconds: integer("duration_seconds"),
   transcript:      text("transcript"),
@@ -99,11 +99,11 @@ export const INDUSTRY_LABELS: Record<string, string> = {
 };
 
 export const CALL_GOAL_LABELS: Record<string, string> = {
-  book_discovery_call: "📅 Book a Discovery Call",
-  close_demo:          "🎯 Close a Demo",
-  overcome_objection:  "🛡️ Overcome an Objection",
-  practice_cold_open:  "🧊 Practice Cold Open Only",
-  full_sales_cycle:    "🔄 Full Sales Cycle",
+  book_discovery_call: "Book a Discovery Call",
+  close_demo:          "Close a Demo",
+  overcome_objection:  "Overcome an Objection",
+  practice_cold_open:  "Practice Cold Open Only",
+  full_sales_cycle:    "Full Sales Cycle",
 };
 
 export const YOUR_ROLE_LABELS: Record<string, string> = {
@@ -116,9 +116,9 @@ export const YOUR_ROLE_LABELS: Record<string, string> = {
 };
 
 export const DIFFICULTY_LABELS: Record<string, string> = {
-  easy:   "🟢 Easy — Warm lead, open to listening",
-  medium: "🟡 Medium — Has a competitor, needs convincing",
-  hard:   "🔴 Hard — Skeptical executive, tough objections",
+  easy:   "Easy ",
+  medium: "Medium",
+  hard:   "Hard",
 };
 
 
