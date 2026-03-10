@@ -1,6 +1,10 @@
+import { HomeView } from "@/modules/home/ui/view/home-view"
+
 const Home = () => {
   return (
-    <div>Home</div>
+    <>
+     <HomeView/> 
+    </>
   )
 }
 
