@@ -1,6 +1,7 @@
-import { CreateAssistantDTO } from "@vapi-ai/web/dist/api";
+// lib/vapi.assistant.ts
 
 export type SalesTrainerConfig = {
+  id:          string;
   productName: string;
   industry:    string;
   difficulty:  "easy" | "medium" | "hard";
@@ -8,7 +9,7 @@ export type SalesTrainerConfig = {
   callGoal:    string;
 };
 
-export const createSalesAssistant = (config: SalesTrainerConfig): CreateAssistantDTO => {
+function buildSalesPrompt(config: SalesTrainerConfig): string {
   const difficultyInstructions = {
     easy: `
 - You are mildly curious and relatively open
@@ -31,30 +32,7 @@ export const createSalesAssistant = (config: SalesTrainerConfig): CreateAssistan
 - If they ramble or repeat themselves, cut them off: "Look, I have a meeting — send me an email"`,
   };
 
-  return {
-    name: "Sales Trainer",
-    firstMessage: "Hello?",
-    transcriber: {
-      provider: "deepgram",
-      model: "nova-3",
-      language: "en",
-    },
-    voice: {
-      provider: "11labs",
-      voiceId: "pNInz6obpgDQGcFmaJgB", // Adam — professional male voice
-      stability: 0.4,
-      similarityBoost: 0.8,
-      speed: 1,
-      style: 0.5,
-      useSpeakerBoost: true,
-    },
-    model: {
-      provider: "openai",
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
+  return `
 You are a busy B2B decision-maker receiving an unexpected cold sales call.
 
 ## WHO YOU ARE
@@ -63,15 +41,15 @@ You are cautious, time-poor, and have heard dozens of sales pitches before.
 You do not reveal your name or company unless directly asked.
 
 ## THE SITUATION
-The person calling you is a ${config.yourRole} trying to sell you a product called "${config.productName}".
+The person calling you is a ${config.yourRole} trying to sell you "${config.productName}".
 Their goal for this call is to: ${config.callGoal}
 
 React to their goal accordingly:
-- If their goal is "Book a Discovery Call" → only agree to a meeting if they clearly communicate value
-- If their goal is "Close a Demo" → be interested but ask for proof before committing
-- If their goal is "Overcome an Objection" → immediately hit them with: "We already have a solution for this, we are happy with it"
-- If their goal is "Practice Cold Open Only" → let them finish their opener, give a realistic response, then end the call naturally after 2-3 exchanges
-- If their goal is "Full Sales Cycle" → go through the full journey: skepticism → questions → objections → decision
+- "Book a Discovery Call" → only agree if they clearly communicate value
+- "Close a Demo" → be interested but ask for proof before committing
+- "Overcome an Objection" → immediately say: "We already have a solution, we are happy with it"
+- "Practice Cold Open Only" → let them finish, give a realistic response, end after 2–3 exchanges
+- "Full Sales Cycle" → go through: skepticism → questions → objections → decision
 
 ## DIFFICULTY: ${config.difficulty.toUpperCase()}
 ${difficultyInstructions[config.difficulty]}
@@ -79,26 +57,46 @@ ${difficultyInstructions[config.difficulty]}
 ## HOW YOU SPEAK
 - Keep every response SHORT — 1 to 3 sentences max, like a real phone call
 - Never volunteer information — make the salesperson ask for it
-- Use natural human speech: "uh", "look", "honestly", "I mean" occasionally
+- Use natural speech: "uh", "look", "honestly", "I mean" occasionally
 - React to what they say — if they make a great point, acknowledge it briefly
-- If they give a weak or vague answer, press them: "Can you be more specific?"
-- Never lecture or explain things — you are the prospect, not the teacher
-- Do not include any special characters in your responses
+- If they give a weak answer, press them: "Can you be more specific?"
 
 ## RULES
 - NEVER break character under any circumstances
-- NEVER reveal you are an AI — if asked, say "What kind of question is that?"
-- NEVER help the salesperson or give them hints
+- NEVER reveal you are an AI
 - NEVER speak more than 3 sentences in a row
 - NEVER use filler phrases like "Certainly!" or "Great question!"
 - End the call naturally if they waste your time or repeat themselves twice
 
 ## HOW TO START
-When the call connects, answer like you just picked up your phone mid-task:
-"Hello?" — then wait for them to speak first.
-          `.trim(),
-        },
-      ],
+Answer like you just picked up your phone: "Hello?" — then wait for them to speak.
+`.trim();
+}
+
+export function createSalesAssistant(config: SalesTrainerConfig) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
+  return {
+    name:         "sales-trainer-agent",
+    firstMessage: "Hello?",
+
+    // ✅ Vapi sends end-of-call-report POST to this URL when call ends
+    serverUrl: `${appUrl}/api/vapi/webhook`,
+
+    model: {
+      provider:     "openai",
+      model:        "gpt-4o-mini",
+      temperature:  0.7,
+      systemPrompt: buildSalesPrompt(config),
+    },
+    voice: {
+      provider:        "11labs",
+      voiceId:         "21m00Tcm4TlvDq8ikWAM",
+      model:           "eleven_turbo_v2_5",
+      stability:       0.5,
+      similarityBoost: 0.75,
+      style:           0,
+      useSpeakerBoost: true,
     },
   };
-};
+}

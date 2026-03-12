@@ -58,23 +58,34 @@ export const getCallById = async (id: string) => {
 
 
 
-// TODO: Get call 
+// TODO: Get Vapi call id 
 export async function updateCallVapiId(callId: string, vapiCallId: string) {
   await db
     .update(calls)
-    .set({ vapiCallId, status: "active", startedAt: new Date() })
+    .set({
+      vapiCallId,                // ← THIS was missing — webhook needs this
+      status: "active",
+      startedAt: new Date()
+    })
     .where(eq(calls.id, callId))
 }
 
-
-export async function getCallHistory() {
+// TODO: Get call
+export async function getCall(callId: string): Promise<Call | null> {
   const { userId } = await auth()
-  if (!userId) return []
+  if (!userId) return null
 
-  return await db
-    .select()
-    .from(calls)
-    .where(eq(calls.userId, userId))
-    .orderBy(desc(calls.createdAt))
-    .limit(50)
+  try {
+    const data: Call[] = await db
+      .select()
+      .from(calls)
+      .where(and(eq(calls.id, callId), eq(calls.userId, userId)))
+
+    if (data.length === 0) return null
+
+    return data[0]
+  } catch (error) {
+    console.error("getCall error:", error)
+    return null
+  }
 }

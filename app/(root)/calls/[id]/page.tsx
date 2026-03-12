@@ -9,7 +9,7 @@ const CallPage = async({params}:Props) => {
  const {id} = await params
  const result = await getCallById(id)
  const user = await currentUser();
- if(!user) return <div className="flex flex-col text-red-500 min-h-screen">User not found or an error occurred.</div>
+ if(!user) return <div className="flex flex-col text-red-600 h-screen">User not found or an error occurred.</div>
 if (!result.success || !result.data) {
     return <p className="text-red-500">Call not found or an error occurred.</p>
   }
@@ -19,6 +19,7 @@ if (!result.success || !result.data) {
     userName={user?.firstName}
     imageUrl={user?.imageUrl}
     config={result.data}
+    id={id}
     />
     </div>
   )

@@ -3,11 +3,15 @@
 import { createSalesAssistant, SalesTrainerConfig } from "@/lib/assistant";
 import { getVapi } from "@/lib/vapi";
 import { useEffect, useRef, useState } from "react";
+// CHANGE 1: import updateCallVapiId so we can save the Vapi call ID to DB
+import { updateCallVapiId } from "../server/create-call";
 
 type Status = "idle" | "connecting" | "speaking" | "listening" | "thinking";
 type Message = { role: "user" | "assistant"; content: string };
 
-export function useVapiAgent(config: SalesTrainerConfig) {
+// CHANGE 2: accept `id` (your DB row id) as second argument
+// The webhook finds the call row using vapiCallId — we must save it here
+export function useVapiAgent(config: SalesTrainerConfig, id: string) {
 	const vapi = getVapi();
 	const [status, setStatus] = useState<Status>("idle");
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -83,18 +87,15 @@ export function useVapiAgent(config: SalesTrainerConfig) {
 		setStatus("connecting");
 		setMessages([]);
 
-		// 1. Check mic permission — stop the stream immediately after
-		// Vapi will open its own stream; we don't want to hold a duplicate
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			stream.getTracks().forEach((t) => t.stop()); // release immediately
+			stream.getTracks().forEach((t) => t.stop());
 		} catch {
 			console.error("❌ Mic permission denied");
 			setStatus("idle");
 			return;
 		}
 
-		// 2. Start Vapi call
 		const assistantOverrides = {
 			variableValues: {
 				productName: config.productName,
@@ -108,8 +109,19 @@ export function useVapiAgent(config: SalesTrainerConfig) {
 		};
 
 		try {
+			  // ADD THIS — check what webhook URL is being sent to Vapi
+  const assistant = createSalesAssistant(config)
+  console.log("🔗 Webhook URL:", assistant.serverUrl)
+			// CHANGE 3: capture the return value from vapi.start()
+			// vapi.start() returns a call object with `.id` = the Vapi call ID
 			// @ts-expect-error
-			await vapi.start(createSalesAssistant(config), assistantOverrides);
+			const call = await vapi.start(createSalesAssistant(config), assistantOverrides);
+
+			// CHANGE 4: save vapiCallId to DB — webhook NEEDS this to find the row
+			// updateCallVapiId(dbRowId, vapiCallId)
+			if (call?.id) {
+				await updateCallVapiId(id, call.id);
+			}
 		} catch (err) {
 			console.error("❌ Vapi start error:", err);
 			setStatus("idle");
@@ -118,7 +130,6 @@ export function useVapiAgent(config: SalesTrainerConfig) {
 
 	const stop = () => {
 		stoppingRef.current = true;
-		// 1. Kill mic tracks immediately — don't wait for Vapi's call-end event
 		vapi.stop();
 	};
 
