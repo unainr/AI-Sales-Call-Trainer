@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
+    "db:push": "drizzle-kit push",
     "format": "biome format --write"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^3.0.29",
     "@base-ui/react": "^1.2.0",
     "@clerk/nextjs": "^7.0.2",
     "@elevenlabs/react": "^0.14.1",
@@ -19,6 +21,7 @@
     "@react-three/fiber": "^9.5.0",
     "@types/three": "^0.183.1",
     "@vapi-ai/web": "^2.5.2",
+    "ai": "^6.0.116",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

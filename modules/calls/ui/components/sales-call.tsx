@@ -3,15 +3,19 @@
 import React, { useCallback, useRef, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Loader2Icon, PhoneIcon, PhoneOffIcon, MicIcon, Clock } from "lucide-react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { SalesTrainerConfig } from "@/lib/assistant"
 import { useVapiAgent } from "../../hooks/use-vapi-agent"
 import { Orb } from "@/components/ui/orb"
 import { ShimmeringText } from "@/components/ui/shimmering-text"
 
-type Props = { config: SalesTrainerConfig }
+type Props = {
+  config:   SalesTrainerConfig
+  userName: string | null
+  imageUrl: string | null
+}
 
 /* ─── Call Timer ──────────────────────────────────────── */
 function CallTimer() {
@@ -41,10 +45,25 @@ function SoundBars({ color = "currentColor" }: { color?: string }) {
   )
 }
 
-/* ─── User Avatar ─────────────────────────────────────── */
-function UserAvatar({ speaking, size = 88 }: { speaking: boolean; size?: number }) {
+/* ─── User Avatar — real image + name fallback ────────── */
+function UserAvatar({
+  speaking,
+  size = 88,
+  imageUrl,
+  userName,
+}: {
+  speaking: boolean
+  size?: number
+  imageUrl: string | null
+  userName: string | null
+}) {
+  const initials = userName
+    ? userName.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
+    : "U"
+
   return (
     <div className="relative flex items-center justify-center">
+      {/* Ripple rings when speaking */}
       <AnimatePresence>
         {speaking && (
           <>
@@ -52,8 +71,8 @@ function UserAvatar({ speaking, size = 88 }: { speaking: boolean; size?: number 
               <motion.div
                 key={delay}
                 className="absolute rounded-full border border-emerald-400/25"
-                initial={{ width: size, height: size, opacity: 0.6 }}
-                animate={{ width: size * 1.6, height: size * 1.6, opacity: 0 }}
+                initial={{ width: size,       height: size,       opacity: 0.6 }}
+                animate={{ width: size * 1.6, height: size * 1.6, opacity: 0   }}
                 transition={{ duration: 1.9, repeat: Infinity, delay, ease: "easeOut" }}
               />
             ))}
@@ -61,6 +80,7 @@ function UserAvatar({ speaking, size = 88 }: { speaking: boolean; size?: number 
         )}
       </AnimatePresence>
 
+      {/* Avatar circle */}
       <div
         className={cn(
           "relative rounded-full overflow-hidden transition-all duration-500 ring-2",
@@ -70,34 +90,25 @@ function UserAvatar({ speaking, size = 88 }: { speaking: boolean; size?: number 
         )}
         style={{ width: size, height: size }}
       >
-        <svg viewBox="0 0 96 96" fill="none" className="w-full h-full">
-          <defs>
-            <linearGradient id="avBgL" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f4f4f5" />
-              <stop offset="100%" stopColor="#e4e4e7" />
-            </linearGradient>
-            <linearGradient id="avBgD" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3f3f46" />
-              <stop offset="100%" stopColor="#27272a" />
-            </linearGradient>
-            <linearGradient id="avHead" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c4c4cc" />
-              <stop offset="100%" stopColor="#a1a1aa" />
-            </linearGradient>
-            <linearGradient id="avBody" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#d4d4d8" />
-              <stop offset="100%" stopColor="#b4b4bb" />
-            </linearGradient>
-          </defs>
-          <rect width="96" height="96" fill="url(#avBgL)" className="dark:hidden" />
-          <rect width="96" height="96" fill="url(#avBgD)" className="hidden dark:block" />
-          <circle cx="48" cy="34" r="16" fill="url(#avHead)" />
-          <ellipse cx="48" cy="84" rx="30" ry="20" fill="url(#avBody)" />
-        </svg>
+        {imageUrl ? (
+          <Image
+            src={imageUrl??''}
+            alt={userName ?? "You"}
+            fill
+            className="object-cover"
+            sizes={`${size}px`}
+          />
+        ) : (
+          /* Fallback: initials */
+          <div className="w-full h-full flex items-center justify-center bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 font-semibold text-[15px]">
+            {initials}
+          </div>
+        )}
+
         {/* Online dot */}
         <div className={cn(
-          "absolute bottom-1 right-1 size-3.5 rounded-full ring-2",
-          "ring-white dark:ring-zinc-800",
+          "absolute bottom-1 right-1 size-3.5 rounded-full ring-2 transition-colors duration-300",
+          "ring-white dark:ring-zinc-900",
           speaking ? "bg-emerald-400" : "bg-zinc-300 dark:bg-zinc-600"
         )} />
       </div>
@@ -117,7 +128,7 @@ function TypingCursor() {
 }
 
 /* ─── Main ────────────────────────────────────────────── */
-export default function SalesAgentUI({ config }: Props) {
+export default function SalesAgentUI({ config, userName, imageUrl }: Props) {
   const {
     status,
     start,
@@ -139,11 +150,8 @@ export default function SalesAgentUI({ config }: Props) {
   }, [messages, liveAssistantText, liveUserText])
 
   const handleCall = useCallback(() => {
-    if (status === "idle") {
-      start()
-    } else if (status !== "connecting") {
-      stop()
-    }
+    if (status === "idle") start()
+    else if (status !== "connecting") stop()
   }, [status, start, stop])
 
   const isCallActive    = isActive && status !== "connecting"
@@ -151,6 +159,9 @@ export default function SalesAgentUI({ config }: Props) {
   const isSpeaking      = status === "speaking"
   const isListening     = status === "listening"
   const isThinking      = status === "thinking"
+
+  // Display name: full name or fallback
+  const displayName = userName ?? "You"
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -167,7 +178,6 @@ export default function SalesAgentUI({ config }: Props) {
           "shadow-sm transition-all duration-500",
           isSpeaking && "ring-[1.5px] ring-emerald-400/40 shadow-[0_0_0_4px_rgba(52,211,153,0.05)]"
         )}>
-          {/* Subtle top-right vignette */}
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,transparent_60%,rgba(0,0,0,0.03)_100%)] dark:bg-[radial-gradient(ellipse_at_80%_20%,transparent_60%,rgba(0,0,0,0.3)_100%)]" />
 
           {/* Timer */}
@@ -187,10 +197,8 @@ export default function SalesAgentUI({ config }: Props) {
             )}
           </AnimatePresence>
 
-          {/* Orb content */}
+          {/* Orb */}
           <div className="relative z-10 flex flex-col items-center gap-5">
-
-            {/* Orb with speaking glow */}
             <div className="relative flex items-center justify-center">
               <AnimatePresence>
                 {isSpeaking && (
@@ -217,7 +225,6 @@ export default function SalesAgentUI({ config }: Props) {
                   </div>
                 </div>
 
-                {/* Speaking pulse rings */}
                 {isSpeaking && (
                   <>
                     <motion.div
@@ -235,7 +242,7 @@ export default function SalesAgentUI({ config }: Props) {
               </div>
             </div>
 
-            {/* Name + info */}
+            {/* Name + status */}
             <div className="flex flex-col items-center gap-1.5 text-center">
               <span className="text-[18px] font-bold text-zinc-800 dark:text-zinc-100 tracking-tight">
                 {config.productName}
@@ -244,22 +251,18 @@ export default function SalesAgentUI({ config }: Props) {
                 {config.industry.replace(/_/g, " ")} · {config.difficulty}
               </span>
 
-              {/* Status badge */}
               <div className={cn(
                 "mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold",
-                "bg-black/5 dark:bg-white/6",
-                "ring-1 ring-black/6 dark:ring-white/8"
+                "bg-black/5 dark:bg-white/6 ring-1 ring-black/6 dark:ring-white/8"
               )}>
                 <AnimatePresence mode="wait">
                   {isSpeaking ? (
                     <motion.span key="spk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400">
-                      <SoundBars color="#10b981" />
-                      Speaking
+                      <SoundBars color="#10b981" />Speaking
                     </motion.span>
                   ) : isThinking ? (
                     <motion.span key="thk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400">
-                      <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
-                      Thinking…
+                      <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />Thinking…
                     </motion.span>
                   ) : isTransitioning ? (
                     <motion.span key="con" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-500">
@@ -268,13 +271,11 @@ export default function SalesAgentUI({ config }: Props) {
                     </motion.span>
                   ) : isCallActive ? (
                     <motion.span key="lst" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-                      <span className="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
-                      Listening
+                      <span className="size-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />Listening
                     </motion.span>
                   ) : (
                     <motion.span key="off" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-500">
-                      <span className="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-                      Offline
+                      <span className="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600" />Offline
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -294,9 +295,18 @@ export default function SalesAgentUI({ config }: Props) {
             "transition-all duration-500",
             isListening && "ring-[1.5px] ring-emerald-400/40 shadow-[0_0_0_4px_rgba(52,211,153,0.05)]"
           )}>
-            <UserAvatar speaking={isListening} size={88} />
+            {/* Real user image */}
+            <UserAvatar
+              speaking={isListening}
+              size={88}
+              imageUrl={imageUrl}
+              userName={userName}
+            />
             <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">You</span>
+              {/* Full name */}
+              <span className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100 text-center leading-tight">
+                {displayName}
+              </span>
               <span className="text-[12px] text-zinc-400 dark:text-zinc-500 capitalize">
                 {config.yourRole.replace(/_/g, " ")}
               </span>
@@ -310,7 +320,6 @@ export default function SalesAgentUI({ config }: Props) {
             "ring-1 ring-black/6 dark:ring-white/6 shadow-sm"
           )}>
 
-            {/* Timer row */}
             <AnimatePresence>
               {isCallActive && (
                 <motion.div
@@ -330,28 +339,19 @@ export default function SalesAgentUI({ config }: Props) {
             {/* Mic status */}
             <div className={cn(
               "flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-medium",
-              "bg-black/4 dark:bg-white/5",
-              "ring-1 ring-black/5 dark:ring-white/6",
+              "bg-black/4 dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/6",
               isListening
                 ? "text-emerald-500 dark:text-emerald-400"
                 : "text-zinc-400 dark:text-zinc-500"
             )}>
               {isListening ? (
-                <>
-                  <SoundBars color="#10b981" />
-                  <span className="font-semibold">You're speaking</span>
-                </>
+                <><SoundBars color="#10b981" /><span className="font-semibold">You're speaking</span></>
               ) : (
-                <>
-                  <MicIcon className="size-3.5" />
-                  <span>
-                    {isCallActive ? "Mic ready" : "Turn off microphone"}
-                  </span>
-                </>
+                <><MicIcon className="size-3.5" /><span>{isCallActive ? "Mic ready" : "Microphone"}</span></>
               )}
             </div>
 
-            {/* ── Call button ── */}
+            {/* Call button */}
             <motion.div whileTap={{ scale: 0.97 }} className="w-full">
               <Button
                 onClick={handleCall}
@@ -366,36 +366,16 @@ export default function SalesAgentUI({ config }: Props) {
               >
                 <AnimatePresence mode="wait">
                   {isTransitioning ? (
-                    <motion.div
-                      key="spin"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
+                    <motion.div key="spin" animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                       <Loader2Icon className="size-4" />
                     </motion.div>
                   ) : isCallActive ? (
-                    <motion.div
-                      key="end"
-                      initial={{ scale: 0.75, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.75, opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex items-center gap-2"
-                    >
-                      <PhoneOffIcon className="size-4" />
-                      End Session
+                    <motion.div key="end" initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.75, opacity: 0 }} transition={{ duration: 0.15 }} className="flex items-center gap-2">
+                      <PhoneOffIcon className="size-4" />End Call
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="start"
-                      initial={{ scale: 0.75, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.75, opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex items-center gap-2"
-                    >
-                      <PhoneIcon className="size-4" />
-                      Start Session
+                    <motion.div key="start" initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.75, opacity: 0 }} transition={{ duration: 0.15 }} className="flex items-center gap-2">
+                      <PhoneIcon className="size-4" />Start Call
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -420,7 +400,6 @@ export default function SalesAgentUI({ config }: Props) {
               "ring-1 ring-black/6 dark:ring-white/6 shadow-sm"
             )}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-black/5 dark:border-white/5">
               <div className="flex items-center gap-2">
                 <motion.span
@@ -442,13 +421,11 @@ export default function SalesAgentUI({ config }: Props) {
               </span>
             </div>
 
-            {/* Chat bubbles */}
             <div
               ref={scrollRef}
               className="flex flex-col gap-3 p-4 h-56 overflow-y-auto"
               style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0,0,0,0.1) transparent" }}
             >
-              {/* Empty state */}
               {messages.length === 0 && !liveAssistantText && !liveUserText && (
                 <div className="flex flex-col items-center justify-center py-10 gap-2">
                   <div className="flex gap-1 items-end">
@@ -465,7 +442,6 @@ export default function SalesAgentUI({ config }: Props) {
                 </div>
               )}
 
-              {/* Settled messages */}
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
@@ -475,7 +451,7 @@ export default function SalesAgentUI({ config }: Props) {
                   className={cn("flex flex-col gap-1", msg.role === "user" ? "items-end" : "items-start")}
                 >
                   <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1">
-                    {msg.role === "user" ? "You" : config.productName}
+                    {msg.role === "user" ? displayName : config.productName}
                   </span>
                   <div className={cn(
                     "max-w-[78%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed shadow-sm",
@@ -488,38 +464,27 @@ export default function SalesAgentUI({ config }: Props) {
                 </motion.div>
               ))}
 
-              {/* Live prospect text */}
               {liveAssistantText && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col gap-1 items-start"
-                >
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1 items-start">
                   <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1">
                     {config.productName}
                   </span>
                   <div className="max-w-[78%] bg-zinc-100/70 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-2xl rounded-tl-[5px] px-4 py-2.5 text-[13px] leading-relaxed italic">
-                    {liveAssistantText}
-                    <TypingCursor />
+                    {liveAssistantText}<TypingCursor />
                   </div>
                 </motion.div>
               )}
 
-              {/* Live user text */}
               {liveUserText && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col gap-1 items-end"
-                >
-                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1">You</span>
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1 items-end">
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider px-1">
+                    {displayName}
+                  </span>
                   <div className="max-w-[78%] bg-zinc-800/6 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 rounded-2xl rounded-tr-[5px] px-4 py-2.5 text-[13px] leading-relaxed italic">
-                    {liveUserText}
-                    <TypingCursor />
+                    {liveUserText}<TypingCursor />
                   </div>
                 </motion.div>
               )}
-
             </div>
           </motion.div>
         )}
