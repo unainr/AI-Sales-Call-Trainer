@@ -3,14 +3,13 @@
 import { createSalesAssistant, SalesTrainerConfig } from "@/lib/assistant";
 import { getVapi } from "@/lib/vapi";
 import { useEffect, useRef, useState } from "react";
-// CHANGE 1: import updateCallVapiId so we can save the Vapi call ID to DB
+// CHANGE 1: import updateCallVapiId to save Vapi call ID to DB
 import { updateCallVapiId } from "../server/create-call";
 
 type Status = "idle" | "connecting" | "speaking" | "listening" | "thinking";
 type Message = { role: "user" | "assistant"; content: string };
 
-// CHANGE 2: accept `id` (your DB row id) as second argument
-// The webhook finds the call row using vapiCallId — we must save it here
+// CHANGE 2: accept `id` (DB row id) as second param
 export function useVapiAgent(config: SalesTrainerConfig, id: string) {
 	const vapi = getVapi();
 	const [status, setStatus] = useState<Status>("idle");
@@ -109,15 +108,11 @@ export function useVapiAgent(config: SalesTrainerConfig, id: string) {
 		};
 
 		try {
-			  // ADD THIS — check what webhook URL is being sent to Vapi
-  const assistant = createSalesAssistant(config)
-  console.log("🔗 Webhook URL:", assistant.serverUrl)
-			// CHANGE 3: capture the return value from vapi.start()
-			// vapi.start() returns a call object with `.id` = the Vapi call ID
+			// CHANGE 3: capture return value — vapi.start() returns the call object
 			// @ts-expect-error
 			const call = await vapi.start(createSalesAssistant(config), assistantOverrides);
 
-			// CHANGE 4: save vapiCallId to DB — webhook NEEDS this to find the row
+			// CHANGE 4: save vapiCallId to DB so generateFeedback can fetch transcript
 			// updateCallVapiId(dbRowId, vapiCallId)
 			if (call?.id) {
 				await updateCallVapiId(id, call.id);
