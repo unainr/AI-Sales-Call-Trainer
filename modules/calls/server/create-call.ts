@@ -6,8 +6,9 @@ import { Call, calls, NewCall } from "@/drizzle/schema"
 import { z } from "zod"
 import { and, desc, eq } from "drizzle-orm"
 import { auth } from "@clerk/nextjs/server"
-import { generateText } from "ai"
+import { generateText, Output } from "ai"
 import { groq } from "@ai-sdk/groq"
+import { feedbackSchema } from "@/lib/utils"
 export const CreateCall = async (values:z.infer<typeof formSchema>) => { 
 const {userId} = await auth()
 if(!userId) return {error:'Unauthorized'}
@@ -135,8 +136,11 @@ const durationSeconds = startedAt && endedAt
     if (!callRow) return { error: 'Call not found' }
  
     // 5. Generate AI feedback with Groq
-    const { text } = await generateText({
-      model: groq('llama-3.3-70b-versatile'),
+    const result  = await generateText({
+      model: groq('llama-3.1-8b-instant'),
+      output:Output.object({
+        schema:feedbackSchema
+      }),
       prompt: `
 You are an expert sales coach reviewing a practice sales call.
  
@@ -167,14 +171,13 @@ outcome rules:
       `.trim(),
     })
  
-    const cleaned = text.replace(/```json|```/g, '').trim()
-    JSON.parse(cleaned) // validate JSON before saving
+   const feedback = result.output
  
     // 6. Save everything to DB
     await db.update(calls).set({
       status:          'completed',
       transcript,
-      feedback:        cleaned,
+      feedback:        JSON.stringify(feedback),
       recordingUrl,
       durationSeconds,
       startedAt:       startedAt ? new Date(startedAt) : null,
