@@ -1,11 +1,11 @@
-import { HomeView } from "@/modules/home/ui/view/home-view"
+import { HomeView } from "@/modules/home/ui/view/home-view";
 
 const Home = () => {
-  return (
-    <>
-     <HomeView/> 
-    </>
-  )
-}
+	return (
+		<>
+			<HomeView />
+		</>
+	);
+};
 
-export default Home
+export default Home;

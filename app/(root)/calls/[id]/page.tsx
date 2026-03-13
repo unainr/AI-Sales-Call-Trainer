@@ -2,6 +2,7 @@ import UserNotFound from '@/components/user-not-found'
 import { getCallById } from '@/modules/calls/server/create-call'
 import SalesAgentUI from '@/modules/calls/ui/components/sales-call'
 import { currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 import React from 'react'
 interface Props {
     params:Promise<{id:string}>
@@ -10,7 +11,7 @@ const CallPage = async({params}:Props) => {
  const {id} = await params
  const result = await getCallById(id)
  const user = await currentUser();
- if(!user) return <UserNotFound/>
+ if(!user) return redirect("/sign-in")
 if (!result.success || !result.data) {
     return <p className="text-red-500">Call not found or an error occurred.</p>
   }

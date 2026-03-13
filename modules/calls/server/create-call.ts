@@ -191,7 +191,8 @@ outcome rules:
 
 
 // TODO: Get Sales Agent
-export const getSalesAgent= async() =>{
+export type CallRow = typeof calls.$inferSelect
+export const SalesAgentByUser= async() =>{
   const {userId}  = await auth()
    if (!userId) {
       return { error: "Unauthorized" };
@@ -202,9 +203,25 @@ export const getSalesAgent= async() =>{
       .from(calls)
       .where(eq(calls.userId, userId))
       .orderBy(desc(calls.createdAt))
-    return data[0] ?? null
+     return { success: true, data };
   } catch (error) {
     console.error("getSalesAgent error:", error)
     return null
+  }
+}
+
+
+export async function deleteCall(callId: string) {
+  const { userId } = await auth()
+  if (!userId) return { error: "Unauthorized" }
+ 
+  try {
+    await db.delete(calls).where(and(
+                eq(calls.id, callId),
+                eq(calls.userId, userId) // 👈 double check ownership on delete
+            ))
+    return { success: true }
+  } catch {
+    return { error: "Failed to delete" }
   }
 }
