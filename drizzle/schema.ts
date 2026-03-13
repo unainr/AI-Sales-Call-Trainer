@@ -64,13 +64,12 @@ export const calls = pgTable("calls", {
 	callGoal: callGoalEnum("call_goal").notNull(),
 	userId: text("user_id").notNull(),
 	// ── Vapi data (filled during / after call) ──
-	vapiCallId: uuid("vapi_call_id").defaultRandom().unique().notNull(),
+	vapiCallId: text("vapi_call_id").unique(),
 	status: callStatusEnum("status").default("pending").notNull(),
 	durationSeconds: integer("duration_seconds"),
 	transcript: text("transcript"),
 	feedback: text("feedback"),
-	score: integer("score"),
-
+	recordingUrl: text("recording_url"),
 	startedAt: timestamp("started_at"),
 	endedAt: timestamp("ended_at"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),

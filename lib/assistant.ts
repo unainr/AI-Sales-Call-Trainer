@@ -74,15 +74,9 @@ Answer like you just picked up your phone: "Hello?" — then wait for them to sp
 }
 
 export function createSalesAssistant(config: SalesTrainerConfig) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
-
   return {
     name:         "sales-trainer-agent",
     firstMessage: "Hello?",
-
-    // ✅ Vapi sends end-of-call-report POST to this URL when call ends
-    serverUrl: `${appUrl}/api/vapi/webhook`,
-
     model: {
       provider:     "openai",
       model:        "gpt-4o-mini",
