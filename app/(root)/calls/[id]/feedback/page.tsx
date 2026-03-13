@@ -152,7 +152,7 @@ function TranscriptSection({ transcript, productName }: {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const FeedbackPage= async({ params }: { params: Promise<{ id: string }> })=> {
   const { userId } = await auth()
-  if (!userId) return <UserNotFound />
+  if (!userId) redirect("/sign-in")
 
   const { id } = await params
   const call   = await getCall(id)
