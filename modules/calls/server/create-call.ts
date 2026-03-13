@@ -9,6 +9,7 @@ import { auth } from "@clerk/nextjs/server"
 import { generateText, Output } from "ai"
 import { groq } from "@ai-sdk/groq"
 import { feedbackSchema } from "@/lib/utils"
+import { buildFeedbackPrompt } from "./prompt"
 export const CreateCall = async (values:z.infer<typeof formSchema>) => { 
 const {userId} = await auth()
 if(!userId) return {error:'Unauthorized'}
@@ -137,38 +138,19 @@ const durationSeconds = startedAt && endedAt
  
     // 5. Generate AI feedback with Groq
     const result  = await generateText({
-      model: groq('llama-3.1-8b-instant'),
+      model: groq('moonshotai/kimi-k2-instruct-0905'),
+      maxOutputTokens: 4000,
       output:Output.object({
         schema:feedbackSchema
       }),
-      prompt: `
-You are an expert sales coach reviewing a practice sales call.
- 
-CALL CONTEXT:
-- Product:    ${callRow.productName}
-- Industry:   ${callRow.industry}
-- Difficulty: ${callRow.difficulty}
-- Goal:       ${callRow.callGoal}
-- Rep Role:   ${callRow.yourRole}
- 
-TRANSCRIPT:
-${transcript}
- 
-Respond ONLY with a valid JSON object — no markdown, no backticks, no extra text.
- 
-{
-  "summary":      "<2-3 sentence overall assessment of the call>",
-  "strengths":    ["<specific strength 1>", "<specific strength 2>", "<specific strength 3>"],
-  "improvements": ["<specific area 1>", "<specific area 2>", "<specific area 3>"],
-  "outcome":      "<success | partial | failed>",
-  "tip":          "<one specific actionable tip for next time>"
-}
- 
-outcome rules:
-- success = call goal was clearly achieved
-- partial  = some progress made but goal not fully met
-- failed   = goal not met or call ended poorly
-      `.trim(),
+    prompt: buildFeedbackPrompt({
+    productName: callRow.productName,
+    industry:    callRow.industry,
+    difficulty:  callRow.difficulty,
+    callGoal:    callRow.callGoal,
+    yourRole:    callRow.yourRole,
+    transcript:  finalTranscript,
+  }),
     })
  
    const feedback = result.output
@@ -176,7 +158,7 @@ outcome rules:
     // 6. Save everything to DB
     await db.update(calls).set({
       status:          'completed',
-      transcript,
+      transcript:finalTranscript,
       feedback:        JSON.stringify(feedback),
       recordingUrl,
       durationSeconds,

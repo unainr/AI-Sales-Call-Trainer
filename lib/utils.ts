@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const feedbackSchema = z.object({
-  summary:      z.string(),
-  strengths:    z.array(z.string()).length(3),
-  improvements: z.array(z.string()).length(3),
+   summary:      z.string(),
+  strengths:    z.array(z.string()).min(2).max(5),
+  improvements: z.array(z.string()).min(2).max(5),
   outcome:      z.enum(["success", "partial", "failed"]),
   tip:          z.string(),
 })

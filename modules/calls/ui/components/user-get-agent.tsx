@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CallRow, deleteCall } from "../../server/create-call"
+import { useRouter } from "next/navigation"
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 const DIFFICULTY: Record<string, { label: string; pill: string; bar: string }> = {
@@ -88,7 +89,7 @@ function DeleteDialog({
 export function CallCard({ call }: { call: CallRow }) {
   const [showDialog, setShowDialog] = useState(false)
   const [deleting,   setDeleting]   = useState(false)
-
+const router = useRouter()
   const diff       = DIFFICULTY[call.difficulty] ?? DIFFICULTY.medium
   const goalLabel  = GOAL_LABEL[call.callGoal]   ?? call.callGoal.replace(/_/g, " ")
   const hasFeedback = call.status === "completed" && !!call.feedback
@@ -97,6 +98,7 @@ export function CallCard({ call }: { call: CallRow }) {
     setDeleting(true)
     await deleteCall(call.id)
     setDeleting(false)
+    router.refresh()
     setShowDialog(false)
   }
 
