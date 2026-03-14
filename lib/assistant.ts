@@ -1,5 +1,7 @@
 // lib/vapi.assistant.ts
 
+import { getVoice } from "./utils";
+
 export type SalesTrainerConfig = {
   id:          string;
   productName: string;
@@ -7,6 +9,7 @@ export type SalesTrainerConfig = {
   difficulty:  "easy" | "medium" | "hard";
   yourRole:    string;
   callGoal:    string;
+  persona:     string;
 };
 
 function buildSalesPrompt(config: SalesTrainerConfig): string {
@@ -74,6 +77,7 @@ Answer like you just picked up your phone: "Hello?" — then wait for them to sp
 }
 
 export function createSalesAssistant(config: SalesTrainerConfig) {
+   const voice = getVoice(config.persona); // add this
   return {
     name:         "sales-trainer-agent",
     firstMessage: "Hello?",
@@ -85,7 +89,7 @@ export function createSalesAssistant(config: SalesTrainerConfig) {
     },
     voice: {
       provider:        "11labs",
-      voiceId:         "21m00Tcm4TlvDq8ikWAM",
+      voiceId:         voice.id,
       model:           "eleven_turbo_v2_5",
       stability:       0.5,
       similarityBoost: 0.75,
