@@ -1,3 +1,4 @@
+import { voiceOptions } from "@/constants"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import {z} from "zod"
@@ -12,3 +13,22 @@ export const feedbackSchema = z.object({
   outcome:      z.enum(["success", "partial", "failed"]),
   tip:          z.string(),
 })
+
+
+export const DEFAULT_VOICE = 'rachel';
+
+
+export const getVoice = (persona?: string) => {
+  if (!persona) return voiceOptions[DEFAULT_VOICE];
+
+  // Find by voice ID
+  const voiceEntry = Object.values(voiceOptions).find((v) => v.id === persona);
+  if (voiceEntry) return voiceEntry;
+
+  // Find by key
+  const voiceByKey = voiceOptions[persona as keyof typeof voiceOptions];
+  if (voiceByKey) return voiceByKey;
+
+  // Default fallback
+  return voiceOptions[DEFAULT_VOICE];
+};

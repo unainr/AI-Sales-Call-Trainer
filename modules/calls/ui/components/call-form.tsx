@@ -41,6 +41,8 @@ import { CreateCall } from "../../server/create-call";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { Sparkles } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { voiceCategories, voiceOptions } from "@/constants";
 
 export function CallForm() {
 	const router = useRouter();
@@ -53,6 +55,7 @@ export function CallForm() {
 			difficulty: "",
 			yourRole: "",
 			callGoal: "",
+			persona: "",
 		},
 	});
 
@@ -240,6 +243,97 @@ export function CallForm() {
 								</Field>
 							)}
 						/>
+						{/* persona field */}
+						<Controller
+							name="persona"
+							control={form.control}
+							render={({ field, fieldState }) => (
+								<Field data-invalid={fieldState.invalid}>
+									<FieldLabel>AI Prospect Voice</FieldLabel>
+									<FieldDescription>
+										Choose the voice your AI prospect will speak in.
+									</FieldDescription>
+
+									<div className="mt-2 space-y-3">
+										{/* Male */}
+										<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+											Male
+										</p>
+										<RadioGroup
+											value={field.value}
+											onValueChange={field.onChange}
+											className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+											{voiceCategories.male.map((key) => {
+												const voice =
+													voiceOptions[key as keyof typeof voiceOptions];
+												return (
+													<label
+														key={key}
+														htmlFor={`voice-${key}`}
+														className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border px-3 py-2.5 text-sm transition-colors
+                  ${
+										field.value === voice.id
+											? "border-primary bg-primary/5"
+											: "border-border hover:border-muted-foreground/50"
+									}`}>
+														<div className="flex items-center gap-2">
+															<RadioGroupItem
+																value={voice.id}
+																id={`voice-${key}`}
+															/>
+															<span className="font-medium">{voice.name}</span>
+														</div>
+														<p className="pl-6 text-xs text-muted-foreground leading-snug">
+															{voice.description}
+														</p>
+													</label>
+												);
+											})}
+										</RadioGroup>
+
+										{/* Female */}
+										<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mt-3">
+											Female
+										</p>
+										<RadioGroup
+											value={field.value}
+											onValueChange={field.onChange}
+											className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+											{voiceCategories.female.map((key) => {
+												const voice =
+													voiceOptions[key as keyof typeof voiceOptions];
+												return (
+													<label
+														key={key}
+														htmlFor={`voice-${key}`}
+														className={`flex cursor-pointer flex-col gap-0.5 rounded-lg border px-3 py-2.5 text-sm transition-colors
+                  ${
+										field.value === voice.id
+											? "border-primary bg-primary/5"
+											: "border-border hover:border-muted-foreground/50"
+									}`}>
+														<div className="flex items-center gap-2">
+															<RadioGroupItem
+																value={voice.id}
+																id={`voice-${key}`}
+															/>
+															<span className="font-medium">{voice.name}</span>
+														</div>
+														<p className="pl-6 text-xs text-muted-foreground leading-snug">
+															{voice.description}
+														</p>
+													</label>
+												);
+											})}
+										</RadioGroup>
+									</div>
+
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</Field>
+							)}
+						/>
 					</FieldGroup>
 				</form>
 			</CardContent>
@@ -252,7 +346,8 @@ export function CallForm() {
 					<Button type="submit" form="call-setup-form" disabled={isPending}>
 						{isPending ? (
 							<>
-								<Spinner />Submit
+								<Spinner />
+								Submit
 							</>
 						) : (
 							<>

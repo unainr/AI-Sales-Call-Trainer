@@ -16,7 +16,7 @@ if(!userId) return {error:'Unauthorized'}
 const validatedFields = formSchema.safeParse(values)
 if(!validatedFields.success) return {error:'Invalid fields'}
 
-const {productName,industry,difficulty,yourRole,callGoal}= validatedFields.data
+const {productName,industry,difficulty,yourRole,callGoal,persona}= validatedFields.data
 try {
     const [data] = await db.insert(calls).values({
         productName,
@@ -25,6 +25,7 @@ try {
         yourRole,
         callGoal,
         userId,
+        persona,
         status:'pending'
     }as NewCall).returning()
     return{
