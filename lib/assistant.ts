@@ -95,6 +95,7 @@ export function createSalesAssistant(config: SalesTrainerConfig) {
       similarityBoost: 0.75,
       style:           0,
       useSpeakerBoost: true,
+      speed: 0.95,
     },
   };
 }
