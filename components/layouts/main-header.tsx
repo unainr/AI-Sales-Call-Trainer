@@ -16,7 +16,8 @@ import Image from "next/image"
 
 const menuItems = [
    { name: 'Home', href: '/' },
-    { name: 'Upload', href: '/upload' },
+   { name: 'New Call', href: '/new-call' },
+    { name: 'Pricing', href: '/pricing' },
   
 ]
 
@@ -51,14 +52,14 @@ const pathname = usePathname();
                 className="-mr-3 flex items-center gap-2 whitespace-nowrap"
               >
                 <Image
-                  src="/logo1.svg"
+                  src="/logo.svg"
                   alt="Design Logo"
                   height={50}
                   width={50}
                   className="z-10 hidden h-6 w-full object-contain dark:block"
                 />
                 <Image
-                  src="/logo.svg"
+                  src="/logo1.svg"
                   alt="Design Logo"
                   height={50}
                   width={50}
@@ -83,7 +84,7 @@ const pathname = usePathname();
                     <li key={index}>
                       <Link
                         href={item.href}
-                        className={cn('text-accent-foreground hover:text-muted-foreground block duration-150',isActive(item.href)&&'text-orange-400 hover:text-orange-500 underline underline-offset-4  font-semibold')}>
+                        className={cn('text-accent-foreground hover:text-muted-foreground block duration-150',isActive(item.href)&&'text-red-400 hover:text-orange-500 underline underline-offset-4  font-semibold')}>
                         <span>{item.name}</span>
                       </Link>
                     </li>

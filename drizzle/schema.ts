@@ -63,7 +63,7 @@ export const calls = pgTable("calls", {
 	yourRole: yourRoleEnum("your_role").notNull(),
 	callGoal: callGoalEnum("call_goal").notNull(),
 	userId: text("user_id").notNull(),
-	persona: text('persona'),
+	persona: text('persona').notNull(),
 	// ── Vapi data (filled during / after call) ──
 	vapiCallId: text("vapi_call_id").unique(),
 	status: callStatusEnum("status").default("pending").notNull(),

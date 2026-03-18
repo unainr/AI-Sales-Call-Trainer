@@ -1,4 +1,5 @@
 import { MainHeader } from "@/components/layouts/main-header"
+import { Footer } from "@/modules/home/ui/components/footer"
 import { LayoutType } from "@/types"
 
 const Layout = ({children}:LayoutType) => {
@@ -6,6 +7,8 @@ const Layout = ({children}:LayoutType) => {
     <>
     <MainHeader/>
     {children}
+   <Footer/>
+
     </>
   )
 }

@@ -32,3 +32,9 @@ export const getVoice = (persona?: string) => {
   // Default fallback
   return voiceOptions[DEFAULT_VOICE];
 };
+
+
+export function startOfMonth() {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), 1)
+}

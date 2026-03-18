@@ -10,7 +10,7 @@ export const SignInButtonClerk = () => {
 				<SignInButton >
 					<Button
 						asChild
-						className="rounded-lg bg-[#845fff] hover:bg-[#845fff]/90  text-white">
+						variant={'neon'}>
 						<Link href="/sign-in">Get Started</Link>
 					</Button>
 				</SignInButton>
@@ -20,7 +20,7 @@ export const SignInButtonClerk = () => {
 				<UserButton />
 				<Button
 					asChild
-					className="rounded-lg bg-[#845fff] hover:bg-[#845fff]/90  text-white">
+					variant={'neon'}>
 					<Link href="/dashboard">Dashboard</Link>
 				</Button>
 			</Show>
