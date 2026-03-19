@@ -296,6 +296,7 @@ export function CallForm() {
           Reset
         </Button>
         <Button
+        variant={'neon'}
           type="submit"
           form="call-setup-form"
           size="sm"
@@ -305,7 +306,7 @@ export function CallForm() {
           {isPending ? (
             <><Spinner className="w-3.5 h-3.5" /> Submitting…</>
           ) : (
-            <><Sparkles size={13} /> Start Call</>
+            <><Sparkles size={13} /> Create Call</>
           )}
         </Button>
       </div>

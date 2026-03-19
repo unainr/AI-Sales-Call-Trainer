@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2Icon, SparklesIcon } from "lucide-react"
 import { generateFeedback } from "@/modules/calls/server/create-call"
+import { Button } from "@/components/ui/button"
 
 type Props = {
   callId:     string
@@ -34,11 +35,11 @@ export function GenerateFeedbackButton({ callId, vapiCallId }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
-      <button
+      <Button
         onClick={handleGenerate}
         disabled={loading}
         className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl
-          bg-zinc-900 dark:bg-white text-white dark:text-zinc-900
+          bg-red-900 dark:bg-red-700 
           font-semibold text-[13px] shadow-md
           hover:opacity-90 active:opacity-80
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -55,7 +56,7 @@ export function GenerateFeedbackButton({ callId, vapiCallId }: Props) {
             Generate Feedback
           </>
         )}
-      </button>
+      </Button>
 
       {error && (
         <p className="text-[13px] text-red-500 text-center">{error}</p>

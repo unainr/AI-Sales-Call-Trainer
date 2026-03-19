@@ -1,6 +1,7 @@
 // modules/dashboard/ui/components/empty-state.tsx
 import Link from "next/link"
 import { MicIcon, PlusIcon } from "lucide-react"
+import { Button } from "./ui/button"
 
 export function EmptyState() {
   return (
@@ -17,10 +18,12 @@ export function EmptyState() {
         </p>
       </div>
       <Link
-        href="/calls/new"
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
+        href="/new-call"
       >
+        <Button variant={'neon'}>
+
         <PlusIcon className="size-3.5" />New Session
+        </Button>
       </Link>
     </div>
   )

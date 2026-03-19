@@ -75,7 +75,7 @@ const DashboardPage = async () => {
 						</p>
 					</div>
 					<Link
-						href="/calls/new"
+						href="/new-call"
 						className="flex items-center gap-1.5 px-4 py-2.5 rounded-[13px] text-[13px] font-semibold text-white shrink-0 transition-all hover:opacity-85 hover:-translate-y-px active:translate-y-0 bg-red-500 hover:bg-red-400"
 						style={{ boxShadow: "0 4px 18px rgba(239,68,68,.35)" }}>
 						<PlusIcon className="size-3.5" strokeWidth={2.5} />
