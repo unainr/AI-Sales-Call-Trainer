@@ -262,7 +262,7 @@ export default function SalesAgentUI({ config, id, userName, imageUrl }: Props) 
             {/* Smaller avatar on mobile */}
             <UserAvatar
               speaking={isListening}
-              size={74}
+              size={65}
               imageUrl={imageUrl}
               userName={userName}
             />
@@ -314,8 +314,8 @@ export default function SalesAgentUI({ config, id, userName, imageUrl }: Props) 
                 className={cn(
                   "w-full h-10 md:h-11 rounded-xl gap-2 font-semibold text-[13px] border-0 transition-all duration-300 shadow-md",
                   isCallActive
-                    ? "bg-red-500 hover:bg-red-400 active:bg-red-600 text-white shadow-red-500/25"
-                    : "bg-zinc-900 hover:bg-zinc-800 active:bg-black text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 shadow-black/10"
+                   ? "bg-red-600 hover:bg-red-500 active:bg-red-700 text-white shadow-red-500/25"
+                   : "bg-red-500 hover:bg-red-400 active:bg-red-600 text-white shadow-red-500/20"
                 )}
               >
                 <AnimatePresence mode="wait">
@@ -334,7 +334,7 @@ export default function SalesAgentUI({ config, id, userName, imageUrl }: Props) 
                       <span className="hidden sm:inline">End Call</span>
                     </motion.div>
                   ) : (
-                    <motion.div key="start" initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.75, opacity: 0 }} transition={{ duration: 0.15 }} className="flex items-center gap-2 bg-red-500">
+                    <motion.div key="start" initial={{ scale: 0.75, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.75, opacity: 0 }} transition={{ duration: 0.15 }} className="flex items-center gap-2 ">
                       <PhoneIcon className="size-4" />
                       <span className="hidden sm:inline">Start Call</span>
                     </motion.div>

@@ -41,7 +41,7 @@ export function GenerateFeedbackButton({ callId, vapiCallId }: Props) {
         className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl
           bg-red-900 dark:bg-red-700 
           font-semibold text-[13px] shadow-md
-          hover:opacity-90 active:opacity-80
+          hover:opacity-90  text-white active:opacity-80
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-opacity"
       >
