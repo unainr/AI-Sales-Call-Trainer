@@ -62,7 +62,7 @@ export default function RootLayout({
 			appearance={{
 				variables: {
 					colorPrimary: "#d82b2b",
-					colorTextOnPrimaryBackground: "#ffffff",
+					colorPrimaryForeground: "#ffffff",
 				},
 			}}>
 			<html lang="en" suppressHydrationWarning>

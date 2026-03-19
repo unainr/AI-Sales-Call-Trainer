@@ -11,7 +11,6 @@ import {
 import { getCall } from "@/modules/calls/server/create-call"
 import { GenerateFeedbackButton } from "@/modules/calls/ui/components/auto-refresh"
 import UserNotFound from "@/components/user-not-found"
-import { Button } from "@/components/ui/button"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Outcome = "success" | "partial" | "failed"
@@ -351,11 +350,8 @@ const FeedbackPage= async({ params }: { params: Promise<{ id: string }> })=> {
             <RotateCcwIcon className="size-3.5" />Practice Again
           </Link>
           <Link href="/dashboard"
-            >
-              <Button className="flex items-center justify-center py-3 rounded-xl text-[13px] font-semibold hover:bg-red-600 dark:bg-red-500 text-white  hover:opacity-90 transition-opacity">
-
+            className="flex items-center justify-center py-3 rounded-xl text-[13px] font-semibold hover:bg-red-600 dark:bg-red-500 text-white  hover:opacity-90 transition-opacity">
             Dashboard
-              </Button>
           </Link>
         </div>
 
