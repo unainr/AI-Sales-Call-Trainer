@@ -10,9 +10,12 @@ import { generateText, Output } from "ai"
 import { groq } from "@ai-sdk/groq"
 import { feedbackSchema } from "@/lib/utils"
 import { buildFeedbackPrompt } from "./prompt"
+import { canCreateCall } from "@/modules/pricing/server/pricing"
 export const CreateCall = async (values:z.infer<typeof formSchema>) => { 
 const {userId} = await auth()
 if(!userId) return {error:'Unauthorized'}
+const allowed = await canCreateCall()
+if (!allowed) return { error: 'You have reached your call limit. Please upgrade your plan.' }
 const validatedFields = formSchema.safeParse(values)
 if(!validatedFields.success) return {error:'Invalid fields'}
 
@@ -40,6 +43,9 @@ try {
 
 // TODO: Get call by Id
 export const getCallById = async (id: string) => {
+   // ✅ Pricing gate
+  const allowed = await canCreateCall()
+  if (!allowed) return { success: false, error: 'limit_reached' }
   try {
     // Select the call where id matches
     const data: Call[] = await db.select().from(calls).where(eq(calls.id, id))
