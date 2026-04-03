@@ -15,7 +15,7 @@ const CallPage = async({params}:Props) => {
 if (!result.success || !result.data) {
     return <p className="text-red-500">Call not found or an error occurred.</p>
   }
-  if (result.error === 'limit_reached') redirect("/pricing")
+  if (result.error === 'limit_reached') <p className="text-red-500">Call Limited Reached.</p>
  return (
    <div className="min-h-screen p-3 py-20">
     <SalesAgentUI
