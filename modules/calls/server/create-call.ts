@@ -145,7 +145,7 @@ const durationSeconds = startedAt && endedAt
  
     // 5. Generate AI feedback with Groq
     const result  = await generateText({
-      model: groq('moonshotai/kimi-k2-instruct-0905'),
+      model: groq('llama-3.3-70b-versatile'),
       maxOutputTokens: 4000,
       output:Output.object({
         schema:feedbackSchema
